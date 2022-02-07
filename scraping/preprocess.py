@@ -212,7 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_frames_dir', default='data/frames', help='Output folder for preprocessed video frames and audio chunks.')
     parser.add_argument('--output_prep_hr_dir', default='data/preproc-hr', help='Output folder for preprocessed high-resolution videos.')
     parser.add_argument('--flownet2_dir', default='', help='Path to flownet2 older for preprocessed high-resolution videos.')
-    parser.add_argument('--num_workers', default=4, type=int, help='Number of parallel workers.')
+    parser.add_argument('--num_workers', default=8, type=int, help='Number of parallel workers.')
     parser.add_argument('--prep_hr_video', action='store_true', help='Flag to pre-process videos in high-resolution (for deployment only).')
     parser.add_argument('--low_res', action='store_true', help='Flag if low-resolution videos have been downloaded.')
     parser.add_argument('--gpus', default='0', type=str, help='GPU ids available. (eg 0,1,2)')
