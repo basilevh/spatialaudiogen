@@ -16,7 +16,7 @@ import numpy as np
 #             print '{}/{}: {}'.format(ii, len(youtube_ids), url)
                 
 #             try:
-#                 data_fmt = os.popen('youtube-dl -F "{}"'.format(url)).read().splitlines()
+#                 data_fmt = os.popen('yt-dlp -F "{}"'.format(url)).read().splitlines()
 #                 data_fmt = [l.split() for l in data_fmt]
 #                 data_fmt = [l for l in data_fmt if l[0].isdigit() and l[1] == 'mp4']
 #                 width = np.array([float(l[2].split('x')[0]) for l in data_fmt])
@@ -30,7 +30,7 @@ import numpy as np
 
 
 def download_video(url, fmt, video_dir):
-    cmd = ['youtube-dl', '--ignore-errors', 
+    cmd = ['yt-dlp', '--ignore-errors', 
            '--download-archive', 'scraping/downloaded_video.txt', 
            '--format', fmt, 
            '-o', '"{}/%(id)s.video.%(ext)s"'.format(video_dir),
@@ -39,7 +39,7 @@ def download_video(url, fmt, video_dir):
 
 
 def download_audio(url, fmt, audio_dir):
-    cmd = ['youtube-dl', '--ignore-errors', 
+    cmd = ['yt-dlp', '--ignore-errors', 
            '--download-archive', 'scraping/downloaded_audio.txt', 
            '--format', fmt, 
            '-o', '"{}/%(id)s.audio.f%(format_id)s.%(ext)s"'.format(audio_dir),

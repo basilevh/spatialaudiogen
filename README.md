@@ -22,7 +22,7 @@ In Neural Information Processing Systems, 2018.
 ## Dependencies
 * python 2.7 (see `requirements.txt` for required packages.)
 * tensorflow 1.4
-* youtube-dl
+* yt-dlp
 * ffmpeg (see my ffmpeg [configuration](https://pedro-morgado.github.io/spatialaudiogen/ffmpeg-config.txt))
 * [FlowNet2](https://github.com/lmb-freiburg/flownet2.git) (caffe)
 
@@ -40,7 +40,7 @@ The composition of each dataset can be seen in `meta/subsets/{DB}.lst`. Three tr
 
 Run `python scrapping/download.py -h` for help.
 
-This script uses `youtube-dl` to download pre-selected audio and video formats for which the encoding scheme has been verified. 
+This script uses `yt-dlp` to download pre-selected audio and video formats for which the encoding scheme has been verified. 
 Videos are downloaded into the `data/orig` directory.
 Unfortunately, a small number of videos have been removed by the creators and will be skipped (36 out of 1189 at the time of writing).
 
