@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./my_yt360",
+        "./scraping",
+    ]
+}
