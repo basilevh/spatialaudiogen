@@ -1,12 +1,13 @@
 # BVH, Feb 2022.
 # Adapted from scraping/preprocess.py.
+# Uses custom format txt files.
 
 import os
 import sys
 
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), 'my_yt360/'))
-sys.path.append(os.path.join(os.getcwd(), 'scraping/'))
+sys.path.append(os.path.join(os.getcwd(), 'scraping/'))  # for utils etc.
 
 import pathlib
 import tempfile
@@ -25,45 +26,68 @@ import multiprocessing as mp
 
 def main():
 
-    # stereopsis = MONO / STEREO.
-    # projection = ER / EAC.
-    # audioenc = aac / opus / vorbis.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--formats_fp', default='my_yt360/test_fmt_fix.txt',
+                        help='File containing list of youtube ids + video + audio formats.')
+    parser.add_argument('--orig_dp', default='/proj/vondrick/datasets/YouTube-360/test_raw_1080',
+                        help='Folder containing raw downloaded videos.')
+    parser.add_argument('--output_dp', default='/proj/vondrick/datasets/YouTube-360/test_preproc',
+                        help='Output folder for preprocessed videos.')
+    parser.add_argument('--num_workers', default=8, type=int,
+                        help='Number of parallel workers.')
+    parser.add_argument('--prep_hr_video', action='store_true',
+                        help='Flag to pre-process videos in high-resolution (for deployment only).')
+    parser.add_argument('--overwrite', action='store_true')
+    args = parser.parse_args(sys.argv[1:])
 
-    # Try SA raw => works
-    if 0:
-        src_vid_fp = r'/proj/vondrick2/datasets/SpatialAudio360/orig/z_RHMC7qAJM.video.mp4'
-        src_aud_fp = r'/proj/vondrick2/datasets/SpatialAudio360/orig/z_RHMC7qAJM.audio.f327.m4a'
-        dst_vid_fp = r'/proj/vondrick/datasets/YouTube-360/prep_test/SA.z_RHMC7qAJM.video.mp4'
-        dst_aud_fp = r'/proj/vondrick/datasets/YouTube-360/prep_test/SA.z_RHMC7qAJM.ambix.m4a'
+    if not os.path.isdir(args.output_dp):
+        os.makedirs(args.output_dp)
+    if not os.path.isdir('my_yt360/pgms'):
+        os.makedirs('my_yt360/pgms')
 
-        dst_dp = str(pathlib.Path(dst_vid_fp).parent)
-        if not os.path.exists(dst_dp):
-            os.makedirs(dst_dp)
+    def worker(q, gpu):
+        while not q.empty():
+            yid, raw_fn = q.get()
+            print('=' * 10, int(q.qsize()), 'remaining', yid, '=' * 10)
 
-        stereopsis = 'MONO'
-        projection = 'EAC'
-        audioenc = 'aac'
+            # Obtain format.
+            audioenc = [l.split()[1] for l in open(args.formats_fp) if l.split()[0] == yid][0]
+            stereopsis = [l.split()[2] for l in open(args.formats_fp) if l.split()[0] == yid][0]
+            projection = [l.split()[3] for l in open(args.formats_fp) if l.split()[0] == yid][0]
+            if projection == '?':
+                projection = 'EAC'
 
-        prepare_video(src_vid_fp, stereopsis, projection,
-                      dst_vid_fp, (224, 448), 10, overwrite=True)
-        prepare_ambisonics(src_aud_fp, dst_aud_fp, audioenc, overwrite=True)
+            # Prepare audio.
+            prep_audio_fn = os.path.join(args.output_dp, '{}-ambix.m4a'.format(yid))
+            prepare_ambisonics(raw_fn, prep_audio_fn, audioenc, args.overwrite)
 
-    # Try YT raw => works too!
-    if 1:
-        src_vid_fp = r'/proj/vondrick/datasets/YouTube-360/test_raw_1080/Zzv73j1pFMM.webm'
-        src_aud_fp = src_vid_fp
-        dst_vid_fp = r'/proj/vondrick/datasets/YouTube-360/prep_test/YT.Zzv73j1pFMM.video.mp4'
-        dst_aud_fp = r'/proj/vondrick/datasets/YouTube-360/prep_test/YT.Zzv73j1pFMM.ambix.m4a'
+            # Prepare video.
+            prep_video_fn = os.path.join(args.output_dp, '{}-video.mp4'.format(yid))
+            if args.prep_hr_video:
+                prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (1080, 1920), 30, args.overwrite)
+            else:
+                prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (224, 448), 10, args.overwrite)
 
-        stereopsis = 'MONO'
-        projection = 'EAC'
-        audioenc = 'opus'
+    to_process = sorted([l.split()[0] for l in open(args.formats_fp)])
+    youtube_files = {os.path.split(fn)[-1].split('.')[0]: fn for fn in glob.glob('{}/*.*'.format(args.orig_dp))}
+    
+    q = mp.Queue()
+    for yid in to_process:
+        if yid in youtube_files:
+            q.put((yid, youtube_files[yid]))
 
-        prepare_video(src_vid_fp, stereopsis, projection,
-                      dst_vid_fp, (224, 448), 10, overwrite=True)
-        prepare_ambisonics(src_aud_fp, dst_aud_fp, audioenc, overwrite=True)
+    proc = []
+    for i in range(args.num_workers):
+        gpu = 0
+        p = mp.Process(target=worker, args=(q, gpu))
+        p.daemon = True
+        p.start()
+        proc.append(p)
 
-    pass
+    for p in proc:
+        p.join()
 
 
 # ==================================
@@ -112,9 +136,9 @@ def prepare_video(inp_fn, stereopsis, projection, out_fn, out_shape, out_rate, o
         filter_chain.append('scale={}:{}'.format(out_shape[1], out_shape[0]))
 
     elif projection == 'EAC':
-        xmap_fn = 'scraping/pgms/xmap_{}x{}_{}x{}_{}.pgm'.format(
+        xmap_fn = 'my_yt360/pgms/xmap_{}x{}_{}x{}_{}.pgm'.format(
             height, width, out_shape[0] * 2, out_shape[1] * 2, stereopsis)
-        ymap_fn = 'scraping/pgms/ymap_{}x{}_{}x{}_{}.pgm'.format(
+        ymap_fn = 'my_yt360/pgms/ymap_{}x{}_{}x{}_{}.pgm'.format(
             height, width, out_shape[0] * 2, out_shape[1] * 2, stereopsis)
         if not os.path.isfile(xmap_fn) or not os.path.isfile(ymap_fn):
             # Generate coord maps
