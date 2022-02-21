@@ -16,9 +16,9 @@ from pyutils.iolib.video import getFFprobeMeta
 def main():
 
     # src_dp = r'/proj/vondrick2/datasets/SpatialAudio360/orig'
-    src_dp = r'/proj/vondrick/datasets/YouTube-360/test_raw_1080'
-    dst_fp1 = r'my_yt360/test_aud_fmt_auto.txt'  # OLD / OBSOLETE, see vid fmt instead
-    dst_fp2 = r'my_yt360/test_metadata_auto.txt'
+    src_dp = r'/proj/vondrick/datasets/YouTube-360/train_raw_1080'
+    dst_fp1 = r'my_yt360/train_aud_fmt_auto.txt'  # OLD / OBSOLETE, see vid fmt instead
+    dst_fp2 = r'my_yt360/train_metadata_auto.txt'
 
     src_fns = sorted(list(os.listdir(src_dp)))
     metadatas = dict()

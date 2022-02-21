@@ -27,11 +27,11 @@ import multiprocessing as mp
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--formats_fp', default='my_yt360/test_fmt_fix.txt',
+    parser.add_argument('--formats_fp', default='my_yt360/train_fmt_fix.txt',
                         help='File containing list of youtube ids + video + audio formats.')
-    parser.add_argument('--orig_dp', default='/proj/vondrick/datasets/YouTube-360/test_raw_1080',
+    parser.add_argument('--orig_dp', default='/proj/vondrick/datasets/YouTube-360/train_raw_1080',
                         help='Folder containing raw downloaded videos.')
-    parser.add_argument('--output_dp', default='/proj/vondrick/datasets/YouTube-360/test_preproc',
+    parser.add_argument('--output_dp', default='/proj/vondrick/datasets/YouTube-360/train_preproc',
                         help='Output folder for preprocessed videos.')
     parser.add_argument('--num_workers', default=8, type=int,
                         help='Number of parallel workers.')
@@ -55,6 +55,7 @@ def main():
             stereopsis = [l.split()[2] for l in open(args.formats_fp) if l.split()[0] == yid][0]
             projection = [l.split()[3] for l in open(args.formats_fp) if l.split()[0] == yid][0]
             if projection == '?':
+                print('WARNING: I have to manually check and fix projection format.')
                 projection = 'EAC'
 
             # Prepare audio.
