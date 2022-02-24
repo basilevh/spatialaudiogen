@@ -33,10 +33,10 @@ def main():
                         help='Folder containing raw downloaded videos.')
     parser.add_argument('--output_dp', default='/proj/vondrick/datasets/YouTube-360/train_preproc',
                         help='Output folder for preprocessed videos.')
-    parser.add_argument('--num_workers', default=8, type=int,
+    parser.add_argument('--num_workers', default=12, type=int,
                         help='Number of parallel workers.')
-    parser.add_argument('--prep_hr_video', action='store_true',
-                        help='Flag to pre-process videos in high-resolution (for deployment only).')
+    parser.add_argument('--quality_level', default=2, type=int,
+                        help='1 / 2 / 3 / 4.')
     parser.add_argument('--overwrite', action='store_true')
     args = parser.parse_args(sys.argv[1:])
 
@@ -62,18 +62,27 @@ def main():
             prep_audio_fn = os.path.join(args.output_dp, '{}-ambix.m4a'.format(yid))
             prepare_ambisonics(raw_fn, prep_audio_fn, audioenc, args.overwrite)
 
+            # TODO higher video quality with -crf
+            # https://trac.ffmpeg.org/wiki/Encode/H.264
+
             # Prepare video.
             prep_video_fn = os.path.join(args.output_dp, '{}-video.mp4'.format(yid))
-            if args.prep_hr_video:
-                prepare_video(raw_fn, stereopsis, projection,
-                              prep_video_fn, (1080, 1920), 30, args.overwrite)
-            else:
+            if args.quality_level == 1:
                 prepare_video(raw_fn, stereopsis, projection,
                               prep_video_fn, (224, 448), 10, args.overwrite)
+            elif args.quality_level == 2:
+                prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (320, 640), 10, args.overwrite)
+            elif args.quality_level == 3:
+                prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (512, 1024), 10, args.overwrite)
+            elif args.quality_level == 4:
+                prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (1080, 1920), 30, args.overwrite)
 
     to_process = sorted([l.split()[0] for l in open(args.formats_fp)])
     youtube_files = {os.path.split(fn)[-1].split('.')[0]: fn for fn in glob.glob('{}/*.*'.format(args.orig_dp))}
-    
+
     q = mp.Queue()
     for yid in to_process:
         if yid in youtube_files:
@@ -159,6 +168,13 @@ def prepare_video(inp_fn, stereopsis, projection, out_fn, out_shape, out_rate, o
     cmd = ['ffmpeg -y -ss 0']
     for inp in inputs:
         cmd += ['-i', '"' + inp + '"']
+    
+    # Custom: force H264 usage
+    # https://stackoverflow.com/questions/5678695/ffmpeg-usage-to-encode-a-video-to-h264-codec-format
+    # https://trac.ffmpeg.org/wiki/Encode/H.264
+    # TODO: this doubles the resolution for EAC for some reason??
+    cmd += ['-vcodec libx264 -crf 20']
+    
     cmd += ['-an', '-r', str(out_rate)]  # 10, 30
     if projection == 'EAC':
         cmd += ['-lavfi', 'remap']

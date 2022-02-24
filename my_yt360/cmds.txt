@@ -1,0 +1,9 @@
+
+python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/test_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_320/test/ --num_workers 24
+
+
+python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/val_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_320/val/ --num_workers 24
+
+
+python my_yt360/do_preprocess.py --formats_fp my_yt360/train_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/train_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_320/train/ --num_workers 24
+
