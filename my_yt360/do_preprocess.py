@@ -75,7 +75,7 @@ def main():
                               prep_video_fn, (320, 640), 10, args.overwrite)
             elif args.quality_level == 3:
                 prepare_video(raw_fn, stereopsis, projection,
-                              prep_video_fn, (512, 1024), 10, args.overwrite)
+                              prep_video_fn, (480, 960), 20, args.overwrite)
             elif args.quality_level == 4:
                 prepare_video(raw_fn, stereopsis, projection,
                               prep_video_fn, (1080, 1920), 30, args.overwrite)
