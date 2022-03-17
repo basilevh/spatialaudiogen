@@ -26,3 +26,12 @@ python my_yt360/do_preprocess.py --formats_fp my_yt360/train_fmt_fix.txt --orig_
 python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/val_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_480/val/ --num_workers 24 --quality_level 3 && \
 python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/test_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_480/test/ --num_workers 24 --quality_level 3 && \
 python my_yt360/do_preprocess.py --formats_fp my_yt360/train_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/train_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_480/train/ --num_workers 24 --quality_level 3
+
+
+# ========
+# prep_483
+# ========
+
+python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/val_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_483/val/ --num_workers 24 --quality_level 4 && \
+python my_yt360/do_preprocess.py --formats_fp my_yt360/test_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/test_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_483/test/ --num_workers 24 --quality_level 4 && \
+python my_yt360/do_preprocess.py --formats_fp my_yt360/train_fmt_fix.txt --orig_dp /proj/vondrick/datasets/YouTube-360/train_raw_1080/ --output_dp /proj/vondrick/datasets/YouTube-360/prep_483/train/ --num_workers 24 --quality_level 4

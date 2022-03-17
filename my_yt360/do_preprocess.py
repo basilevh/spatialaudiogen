@@ -78,6 +78,9 @@ def main():
                               prep_video_fn, (480, 960), 20, args.overwrite)
             elif args.quality_level == 4:
                 prepare_video(raw_fn, stereopsis, projection,
+                              prep_video_fn, (480, 960), 30, args.overwrite)
+            elif args.quality_level == 5:
+                prepare_video(raw_fn, stereopsis, projection,
                               prep_video_fn, (1080, 1920), 30, args.overwrite)
 
     to_process = sorted([l.split()[0] for l in open(args.formats_fp)])
@@ -172,7 +175,6 @@ def prepare_video(inp_fn, stereopsis, projection, out_fn, out_shape, out_rate, o
     # Custom: force H264 usage
     # https://stackoverflow.com/questions/5678695/ffmpeg-usage-to-encode-a-video-to-h264-codec-format
     # https://trac.ffmpeg.org/wiki/Encode/H.264
-    # TODO: this doubles the resolution for EAC for some reason??
     cmd += ['-vcodec libx264 -crf 20']
     
     cmd += ['-an', '-r', str(out_rate)]  # 10, 30
